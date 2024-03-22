@@ -283,7 +283,7 @@ namespace Always_On_Server
             if (!IsEnabled) // server toggle
             {
                 if (forcePaused) {
-                    Game1.paused = false;
+                    Game1.isTimePaused = false;
                     forcePaused = false;
                 }
                 if (clientPaused) {
@@ -478,14 +478,14 @@ namespace Always_On_Server
                     }
                     else
                     {
-                        Game1.paused = false;
+                        Game1.isTimePaused = false;
                     }
 
                 }
                 else if (numPlayers <= 0 && Game1.timeOfDay >= 610 && Game1.timeOfDay <= 2500 && currentDate != eggFestival && currentDate != flowerDance && currentDate != luau && currentDate != danceOfJellies && currentDate != stardewValleyFair && currentDate != spiritsEve && currentDate != festivalOfIce && currentDate != feastOfWinterStar)
                 {
                     forcePaused = true;
-                    Game1.paused = true;
+                    Game1.isTimePaused = true;
 
                 }
 
@@ -1259,7 +1259,7 @@ namespace Always_On_Server
 
             if (Game1.timeOfDay == 2600)
             {
-                Game1.paused = false;
+                Game1.isTimePaused = false;
             }
         }
 
