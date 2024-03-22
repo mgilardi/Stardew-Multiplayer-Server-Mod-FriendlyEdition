@@ -27,6 +27,7 @@ namespace Always_On_Server
         private int gameClockTicks; //stores in game clock change 
         private int numPlayers; //stores number of players
         private bool IsEnabled;  //stores if the the server mod is enabled 
+        private bool forcePaused = false;
         public int bedX;
         public int bedY;
         public bool clientPaused;
@@ -170,7 +171,7 @@ namespace Always_On_Server
         private void OnRendered(object sender, RenderedEventArgs e)
         {
             //draw a textbox in the top left corner saying Server On
-            if (Game1.options.enableServer && IsEnabled)
+            if (Game1.options.enableServer && IsEnabled && Game1.server != null)
             {
                 int connectionsCount = Game1.server.connectionsCount;
                 DrawTextBox(5, 100, Game1.dialogueFont, "Server Mode On");
@@ -281,6 +282,14 @@ namespace Always_On_Server
         {
             if (!IsEnabled) // server toggle
             {
+                if (forcePaused) {
+                    Game1.paused = false;
+                    forcePaused = false;
+                }
+                if (clientPaused) {
+                    Game1.netWorldState.Value.IsPaused = false;
+                    clientPaused = false;
+                }
                 return;
             }
 
@@ -463,13 +472,19 @@ namespace Always_On_Server
                 if (numPlayers >= 1 || debug)
                 {
                     if (clientPaused)
+                    {
+                        forcePaused = true;
                         Game1.netWorldState.Value.IsPaused = true;
+                    }
                     else
+                    {
                         Game1.paused = false;
+                    }
 
                 }
                 else if (numPlayers <= 0 && Game1.timeOfDay >= 610 && Game1.timeOfDay <= 2500 && currentDate != eggFestival && currentDate != flowerDance && currentDate != luau && currentDate != danceOfJellies && currentDate != stardewValleyFair && currentDate != spiritsEve && currentDate != festivalOfIce && currentDate != feastOfWinterStar)
                 {
+                    forcePaused = true;
                     Game1.paused = true;
 
                 }
