@@ -128,27 +128,6 @@ namespace Always_On_Server
         /// <param name="e">The event data.</param>
         private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
         {
-            // turns on server after the game loads
-            if (Game1.IsServer)
-            {
-                //store levels, set in game levels to max
-                var data = this.Helper.Data.ReadJsonFile<ModData>($"data/{Constants.SaveFolderName}.json") ?? new ModData();
-                data.FarmingLevel = Game1.player.FarmingLevel;
-                data.MiningLevel = Game1.player.MiningLevel;
-                data.ForagingLevel = Game1.player.ForagingLevel;
-                data.FishingLevel = Game1.player.FishingLevel;
-                data.CombatLevel = Game1.player.CombatLevel;
-                this.Helper.Data.WriteJsonFile($"data/{Constants.SaveFolderName}.json", data);
-                Game1.player.setSkillLevel("Farming", 10);
-                Game1.player.setSkillLevel("Mining", 10);
-                Game1.player.setSkillLevel("Foraging", 10);
-                Game1.player.setSkillLevel("Fishing", 10);
-                Game1.player.setSkillLevel("Combat", 10);
-                ////////////////////////////////////////
-                IsEnabled = true;
-                Game1.chatBox.addInfoMessage("The Host is in Server Mode!");
-                this.Monitor.Log("Server Mode On!", LogLevel.Info);
-            }
 
         }
 
@@ -199,11 +178,6 @@ namespace Always_On_Server
                 int profitMargin = this.Config.profitmargin;
                 DrawTextBox(5, 260, Game1.dialogueFont, $"Profit Margin: {profitMargin}%");
                 DrawTextBox(5, 340, Game1.dialogueFont, $"{connectionsCount} Players Online");
-                if (Game1.server.getInviteCode() != null)
-                {
-                    string inviteCode = Game1.server.getInviteCode();
-                    DrawTextBox(5, 420, Game1.dialogueFont, $"Invite Code: {inviteCode}");
-                }
             }
         }
 
@@ -276,52 +250,8 @@ namespace Always_On_Server
             {
                 if (e.Button == this.Config.serverHotKey)
                 {
-                    if (!IsEnabled)
-                    {
-                        Helper.ReadConfig<ModConfig>();
-                        IsEnabled = true;
-                        this.Monitor.Log("The server is on!", LogLevel.Info);
-                        Game1.chatBox.addInfoMessage("The Host is in Server Mode!");
+                    ServerToggle("server", new string[0]);
 
-                        Game1.displayHUD = true;
-                        Game1.addHUDMessage(new HUDMessage("Server Mode On!"));
-
-                        Game1.options.pauseWhenOutOfFocus = false;
-                        // store levels, set in game levels to max
-                        var data = this.Helper.Data.ReadJsonFile<ModData>($"data/{Constants.SaveFolderName}.json") ?? new ModData();
-                        data.FarmingLevel = Game1.player.FarmingLevel;
-                        data.MiningLevel = Game1.player.MiningLevel;
-                        data.ForagingLevel = Game1.player.ForagingLevel;
-                        data.FishingLevel = Game1.player.FishingLevel;
-                        data.CombatLevel = Game1.player.CombatLevel;
-                        this.Helper.Data.WriteJsonFile($"data/{Constants.SaveFolderName}.json", data);
-                        Game1.player.setSkillLevel("Farming", 10);
-                        Game1.player.setSkillLevel("Mining", 10);
-                        Game1.player.setSkillLevel("Foraging", 10);
-                        Game1.player.setSkillLevel("Fishing", 10);
-                        Game1.player.setSkillLevel("Combat", 10);
-                        ///////////////////////////////////////////
-                        Game1.addHUDMessage(new HUDMessage("Server Mode COMPLETE!"));
-                    }
-                    else
-                    {
-                        IsEnabled = false;
-                        this.Monitor.Log("The server is off!", LogLevel.Info);
-
-                        Game1.chatBox.addInfoMessage("The Host has returned!");
-
-                        Game1.displayHUD = true;
-                        Game1.addHUDMessage(new HUDMessage("Server Mode Off!"));
-                        //set player levels to stored levels
-                        var data = this.Helper.Data.ReadJsonFile<ModData>($"data/{Constants.SaveFolderName}.json") ?? new ModData();
-                        Game1.player.setSkillLevel("Farming", data.FarmingLevel);
-                        Game1.player.setSkillLevel("Mining", data.MiningLevel);
-                        Game1.player.setSkillLevel("Foraging", data.ForagingLevel);
-                        Game1.player.setSkillLevel("Fishing", data.FishingLevel);
-                        Game1.player.setSkillLevel("Combat", data.CombatLevel);
-                        //////////////////////////////////////
-
-                    }
                     //warp farmer on button press
                     if (Game1.player.currentLocation is FarmHouse)
                     {
@@ -351,7 +281,6 @@ namespace Always_On_Server
         {
             if (!IsEnabled) // server toggle
             {
-                Game1.paused = false;
                 return;
             }
 
