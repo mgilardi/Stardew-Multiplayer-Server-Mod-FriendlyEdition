@@ -325,7 +325,7 @@ namespace Always_On_Server
                     //warp farmer on button press
                     if (Game1.player.currentLocation is FarmHouse)
                     {
-                        Game1.warpFarmer("Farm", 64, 15, false);
+                        WarpToFarm();
                     }
                     else
                     {
@@ -961,7 +961,7 @@ namespace Always_On_Server
                             if (Game1.player.currentLocation is FarmHouse)
                             {
                                 this.SendChatMessage("Warping to Farm.");
-                                Game1.warpFarmer("Farm", 64, 15, false);
+                                WarpToFarm();
                             }
                             else
                             {
@@ -1204,13 +1204,10 @@ namespace Always_On_Server
 
                 if (currentDate != grampasGhost && currentDate != eggFestival && currentDate != flowerDance && currentDate != luau && currentDate != danceOfJellies && currentDate != stardewValleyFair && currentDate != spiritsEve && currentDate != festivalOfIce && currentDate != feastOfWinterStar)
                 {
-                    if (currentTime == 620)
-                    {
+                    if (currentTime >= 620 && currentTime < 630)
+                    { 
                         //check mail 10 a day
-                        for (int i = 0; i < 10; i++)
-                        {
-                            this.Helper.Reflection.GetMethod(Game1.currentLocation, "mailbox").Invoke();
-                        }
+                        Game1.currentLocation.mailbox();
                     }
                     if (currentTime == 630)
                     {
@@ -1218,96 +1215,28 @@ namespace Always_On_Server
                         //rustkey-sewers unlock
                         if (!Game1.player.hasRustyKey)
                         {
-                            int museumItemCount = Game1.netWorldState.Value.MuseumPieces.Length;
-                            this.Monitor.Log("Checking museum items: " + museumItemCount.ToString(), LogLevel.Info);
-                            if (museumItemCount >= 60)
-                            {
-                                Game1.player.eventsSeen.Add("295672");
-                                Game1.player.eventsSeen.Add("66");
-                                Game1.player.hasRustyKey = true;
-                            }
                         }
 
 
                         //community center complete
                         if (this.Config.communitycenterrun)
                         {
-                            if (!Game1.player.eventsSeen.Contains("191393") && Game1.player.mailReceived.Contains("ccCraftsRoom") && Game1.player.mailReceived.Contains("ccVault") && Game1.player.mailReceived.Contains("ccFishTank") && Game1.player.mailReceived.Contains("ccBoilerRoom") && Game1.player.mailReceived.Contains("ccPantry") && Game1.player.mailReceived.Contains("ccBulletin"))
-                            {
-                                CommunityCenter locationFromName = Game1.getLocationFromName("CommunityCenter") as CommunityCenter;
-                                for (int index = 0; index < locationFromName.areasComplete.Count; ++index)
-                                    locationFromName.areasComplete[index] = true;
-                                Game1.player.eventsSeen.Add("191393");
-
-                            }
                         }
                         //Joja run 
                         if (!this.Config.communitycenterrun)
                         {
-                            if (Game1.player.Money >= 10000 && !Game1.player.mailReceived.Contains("JojaMember"))
-                            {
-                                Game1.player.Money -= 5000;
-                                Game1.player.mailReceived.Add("JojaMember");
-                                this.SendChatMessage("Buying Joja Membership");
-
-                            }
-
-                            if (Game1.player.Money >= 30000 && !Game1.player.mailReceived.Contains("jojaBoilerRoom"))
-                            {
-                                Game1.player.Money -= 15000;
-                                Game1.player.mailReceived.Add("ccBoilerRoom");
-                                Game1.player.mailReceived.Add("jojaBoilerRoom");
-                                this.SendChatMessage("Buying Joja Minecarts");
-
-                            }
-
-                            if (Game1.player.Money >= 40000 && !Game1.player.mailReceived.Contains("jojaFishTank"))
-                            {
-                                Game1.player.Money -= 20000;
-                                Game1.player.mailReceived.Add("ccFishTank");
-                                Game1.player.mailReceived.Add("jojaFishTank");
-                                this.SendChatMessage("Buying Joja Panning");
-
-                            }
-
-                            if (Game1.player.Money >= 50000 && !Game1.player.mailReceived.Contains("jojaCraftsRoom"))
-                            {
-                                Game1.player.Money -= 25000;
-                                Game1.player.mailReceived.Add("ccCraftsRoom");
-                                Game1.player.mailReceived.Add("jojaCraftsRoom");
-                                this.SendChatMessage("Buying Joja Bridge");
-
-                            }
-
-                            if (Game1.player.Money >= 70000 && !Game1.player.mailReceived.Contains("jojaPantry"))
-                            {
-                                Game1.player.Money -= 35000;
-                                Game1.player.mailReceived.Add("ccPantry");
-                                Game1.player.mailReceived.Add("jojaPantry");
-                                this.SendChatMessage("Buying Joja Greenhouse");
-
-                            }
-
-                            if (Game1.player.Money >= 80000 && !Game1.player.mailReceived.Contains("jojaVault"))
-                            {
-                                Game1.player.Money -= 40000;
-                                Game1.player.mailReceived.Add("ccVault");
-                                Game1.player.mailReceived.Add("jojaVault");
-                                this.SendChatMessage("Buying Joja Bus");
-                                Game1.player.eventsSeen.Add("502261");
-                            }
                         }
 
                     }
                     //go outside
                     if (currentTime == 640)
                     {
-                        Game1.warpFarmer("Farm", 64, 15, false);
+                        WarpToFarm();
                     }
                     //get fishing rod (standard spam clicker will get through cutscene)
                     if (currentTime == 900 && !Game1.player.eventsSeen.Contains("739330"))
                     {
-                        Game1.player.increaseBackpackSize(1);
+                        // Game1.player.increaseBackpackSize(1);
                         Game1.warpFarmer("Beach", 1, 20, 1);
                     }
                 }
@@ -1596,7 +1525,19 @@ namespace Always_On_Server
             shippingMenuActive = true;
             if (Game1.activeClickableMenu is ShippingMenu)
             {
-                this.Helper.Reflection.GetMethod(Game1.activeClickableMenu, "okClicked").Invoke();
+                try
+                {
+                    this.Helper.Reflection.GetMethod(Game1.activeClickableMenu, "okClicked").Invoke();
+                }
+                catch (Exception _)
+                {
+                    if (Game1.activeClickableMenu is ShippingMenu)
+                    {
+                        ShippingMenu menu = Game1.activeClickableMenu as ShippingMenu;
+                        Rectangle bounds = menu.okButton.bounds;
+                        menu.receiveLeftClick(bounds.X + 3, bounds.Y + 3);
+                    }
+                }
             }
         }
 
@@ -1677,6 +1618,12 @@ namespace Always_On_Server
                 Game1.timeOfDay = currentDate == spiritsEve ? 2400 : 2200;
                 Game1.shouldTimePass();
             });
+        }
+
+        private void WarpToFarm()
+        {
+            Point farmhousePos = Game1.getFarm().GetMainFarmHouseEntry();
+            Game1.warpFarmer("Farm", farmhousePos.X, farmhousePos.Y, false);
         }
     }
 }

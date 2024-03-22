@@ -8,12 +8,12 @@ namespace Always_On_Server.Framework
 
         public int profitmargin { get; set; } = 100;
         public int upgradeHouse { get; set; } = 0;
-        public string petname { get; set; } = "Qwerty";
+        public string petname { get; set; } = "Noodle";
         public bool farmcavechoicemushrooms { get; set; } = true;
         public bool communitycenterrun { get; set; } = true;
         public int timeOfDayToSleep { get; set; } = 2200;
 
-        public bool lockPlayerChests { get; set; } = true;
+        public bool lockPlayerChests { get; set; } = false;
         public bool clientsCanPause { get; set; } = false;
         public bool copyInviteCodeToClipboard { get; set; } = true;
 
