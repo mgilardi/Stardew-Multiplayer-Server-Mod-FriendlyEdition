@@ -75,15 +75,18 @@ public class ModEntry : Mod
 
     private List<string> queuedCommands = new();
 
-    ModEntry()
+    public ModEntry()
     {
         modInstance = this;
-        Config = Helper.ReadConfig<ModConfig>();
+        Config = new();
     }
 
 
     public override void Entry(IModHelper helper)
     {
+        IsEnabled = false;
+        Config = Helper.ReadConfig<ModConfig>();
+        
         var harmony = new Harmony(ModManifest.UniqueID);
         // chat commands patch
         harmony.Patch(
@@ -121,7 +124,7 @@ public class ModEntry : Mod
         return true;
     }
 
-    static bool Farmer_gainExperience_Prefix(Farmer __instance, int what, int amount)
+    static bool Farmer_gainExperience_Prefix(Farmer __instance, int which, int howMuch)
     {
         if (modInstance!.IsEnabled && __instance.IsLocalPlayer)
         {

@@ -5,6 +5,6 @@
   "Description": "A Headless server mod.",
   "UniqueID": "moy.Always_On_Server",
   "EntryDll": "Stardew-Multiplayer-Server.dll",
-  "MinimumApiVersion": "6.0",
+  "MinimumApiVersion": "4.0",
   "UpdateKeys": [ "Nexus:20659" ]
 }
