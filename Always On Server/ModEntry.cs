@@ -341,7 +341,7 @@ public class ModEntry : Mod
 
 
                 Monitor.Log("Server Mode On!", LogLevel.Info);
-                Game1.chatBox.addInfoMessage("The Host is in Server Mode!");
+                SendChatMessage("The Host is in Server Mode!");
 
                 Game1.displayHUD = true;
                 Game1.addHUDMessage(new HUDMessage("Server Mode On!"));
@@ -353,7 +353,7 @@ public class ModEntry : Mod
                 IsEnabled = false;
                 Monitor.Log("The server off!", LogLevel.Info);
 
-                Game1.chatBox.addInfoMessage("The Host has returned!");
+                SendChatMessage("The Host has returned!");
 
                 Game1.displayHUD = true;
                 Game1.addHUDMessage(new HUDMessage("Server Mode Off!"));
