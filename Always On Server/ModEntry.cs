@@ -86,7 +86,7 @@ public class ModEntry : Mod
     {
         IsEnabled = false;
         Config = Helper.ReadConfig<ModConfig>();
-        
+
         var harmony = new Harmony(ModManifest.UniqueID);
         // chat commands patch
         harmony.Patch(
@@ -411,135 +411,123 @@ public class ModEntry : Mod
 
         //left click menu spammer and event skipper to get through random events happening
         //also moves player around, this seems to free host from random bugs sometimes
-        if (IsEnabled) // server toggle
+        if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is DialogueBox)
         {
-            if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is DialogueBox)
-            {
-                Game1.activeClickableMenu.receiveLeftClick(10, 10);
-            }
-
-            if (skipCooldown != 0)
-            {
-                skipCooldown--;
-            }
-
-            if (Game1.CurrentEvent != null && Game1.CurrentEvent.skippable)
-            {
-                if (skipCooldown == 0)
-                {
-                    Game1.CurrentEvent.skipEvent();
-                    skipCooldown = 10;
-                }
-            }
-            /*if (!playerMovedRight && Game1.player.canMove)
-            {
-                Game1.player.tryToMoveInDirection(1, true, 0, false);
-                playerMovedRight = true;
-            }
-            else if (playerMovedRight && Game1.player.canMove)
-            {
-                Game1.player.tryToMoveInDirection(3, true, 0, false);
-                playerMovedRight = false;
-            }*/
+            Game1.activeClickableMenu.receiveLeftClick(10, 10);
         }
+
+        if (skipCooldown != 0)
+        {
+            skipCooldown--;
+        }
+
+        if (Game1.CurrentEvent != null && Game1.CurrentEvent.skippable)
+        {
+            if (skipCooldown == 0)
+            {
+                Game1.CurrentEvent.skipEvent();
+                skipCooldown = 10;
+            }
+        }
+        /*if (!playerMovedRight && Game1.player.canMove)
+        {
+            Game1.player.tryToMoveInDirection(1, true, 0, false);
+            playerMovedRight = true;
+        }
+        else if (playerMovedRight && Game1.player.canMove)
+        {
+            Game1.player.tryToMoveInDirection(3, true, 0, false);
+            playerMovedRight = false;
+        }*/
 
 
         //disable friendship decay
-        if (IsEnabled) // server toggle
+        if (PreviousFriendships.Any())
         {
-            if (PreviousFriendships.Any())
+            foreach (string key in Game1.player.friendshipData.Keys)
             {
-                foreach (string key in Game1.player.friendshipData.Keys)
-                {
-                    Friendship friendship = Game1.player.friendshipData[key];
-                    if (PreviousFriendships.TryGetValue(key, out int oldPoints) && oldPoints > friendship.Points)
-                        friendship.Points = oldPoints;
-                }
+                Friendship friendship = Game1.player.friendshipData[key];
+                if (PreviousFriendships.TryGetValue(key, out int oldPoints) && oldPoints > friendship.Points)
+                    friendship.Points = oldPoints;
             }
-
-            PreviousFriendships.Clear();
-            foreach (var pair in Game1.player.friendshipData.FieldDict)
-                PreviousFriendships[pair.Key] = pair.Value.Value.Points;
         }
+
+        PreviousFriendships.Clear();
+        foreach (var pair in Game1.player.friendshipData.FieldDict)
+            PreviousFriendships[pair.Key] = pair.Value.Value.Points;
 
 
         //eggHunt event
-        if (eggHuntAvailable && Game1.CurrentEvent != null && Game1.CurrentEvent.isFestival)
+        if (eggHuntAvailable && IsInFestival())
         {
             if (eventCommandUsed)
             {
-                Helper.Reflection.GetMethod(Game1.CurrentEvent, "answerDialogueQuestion")
-                    .Invoke(Game1.getCharacterFromName("Lewis"), "yes");
+                Game1.CurrentEvent!.answerDialogueQuestion(Game1.getCharacterFromName("Lewis"), "yes");
                 eventCommandUsed = false;
             }
         }
 
 
         //flowerDance event
-        if (flowerDanceAvailable && Game1.CurrentEvent != null && Game1.CurrentEvent.isFestival)
+        if (flowerDanceAvailable && IsInFestival())
         {
             if (eventCommandUsed)
             {
-                Helper.Reflection.GetMethod(Game1.CurrentEvent, "answerDialogueQuestion")
-                    .Invoke(Game1.getCharacterFromName("Lewis"), "yes");
+                Game1.CurrentEvent!.answerDialogueQuestion(Game1.getCharacterFromName("Lewis"), "yes");
                 eventCommandUsed = false;
             }
         }
 
         //luauSoup event
-        if (luauSoupAvailable && Game1.CurrentEvent != null && Game1.CurrentEvent.isFestival)
+        if (luauSoupAvailable && IsInFestival())
         {
             if (eventCommandUsed)
             {
                 //add iridium starfruit to soup
-                var item = new SObject("Starfruit", 1, false, -1, 3);
-                Helper.Reflection.GetMethod(new Event(), "addItemToLuauSoup").Invoke(item, Game1.player);
-                Helper.Reflection.GetMethod(Game1.CurrentEvent, "answerDialogueQuestion")
-                    .Invoke(Game1.getCharacterFromName("Lewis"), "yes");
+                var item = ItemRegistry.Create("(O)268", 1, 3);
+                new Event().addItemToLuauSoup(item, Game1.player);
+                Game1.CurrentEvent!.answerDialogueQuestion(Game1.getCharacterFromName("Lewis"), "yes");
                 eventCommandUsed = false;
             }
         }
 
         //Dance of the Moonlight Jellies event
-        if (jellyDanceAvailable && Game1.CurrentEvent != null && Game1.CurrentEvent.isFestival)
+        if (jellyDanceAvailable && IsInFestival())
         {
             if (eventCommandUsed)
             {
-                Helper.Reflection.GetMethod(Game1.CurrentEvent, "answerDialogueQuestion")
-                    .Invoke(Game1.getCharacterFromName("Lewis"), "yes");
+                Game1.CurrentEvent!.answerDialogueQuestion(Game1.getCharacterFromName("Lewis"), "yes");
                 eventCommandUsed = false;
             }
         }
 
         //Grange Display event
-        if (grangeDisplayAvailable && Game1.CurrentEvent != null && Game1.CurrentEvent.isFestival)
+        if (grangeDisplayAvailable && IsInFestival())
         {
             if (eventCommandUsed)
             {
-                Helper.Reflection.GetMethod(Game1.CurrentEvent, "answerDialogueQuestion")
-                    .Invoke(Game1.getCharacterFromName("Lewis"), "yes");
+                Game1.CurrentEvent!.answerDialogueQuestion(Game1.getCharacterFromName("Lewis"), "yes");
                 eventCommandUsed = false;
             }
         }
 
         //golden pumpkin maze event
-        if (goldenPumpkinAvailable && Game1.CurrentEvent != null && Game1.CurrentEvent.isFestival)
+        if (goldenPumpkinAvailable && IsInFestival())
         {
         }
 
         //ice fishing event
-        if (iceFishingAvailable && Game1.CurrentEvent != null && Game1.CurrentEvent.isFestival)
+        if (iceFishingAvailable && IsInFestival())
         {
             if (eventCommandUsed)
             {
-                Helper.Reflection.GetMethod(Game1.CurrentEvent, "answerDialogueQuestion")
-                    .Invoke(Game1.getCharacterFromName("Lewis"), "yes");
+                Game1.CurrentEvent!.answerDialogueQuestion(Game1.getCharacterFromName("Lewis"), "yes");
                 eventCommandUsed = false;
             }
         }
 
         //Feast of the Winter event
-        if (winterFeastAvailable && Game1.CurrentEvent != null && Game1.CurrentEvent.isFestival)
+        if (winterFeastAvailable && IsInFestival())
         {
         }
     }
@@ -562,10 +550,7 @@ public class ModEntry : Mod
                 Game1.isTimePaused = false;
             }
         }
-        else if (numPlayers <= 0 && Game1.timeOfDay is >= 610 and <= 2500 &&
-                 currentDate != eggFestival && currentDate != flowerDance && currentDate != luau &&
-                 currentDate != danceOfJellies && currentDate != stardewValleyFair && currentDate != spiritsEve &&
-                 currentDate != festivalOfIce && currentDate != feastOfWinterStar)
+        else if (numPlayers <= 0)
         {
             forcePaused = true;
             Game1.isTimePaused = true;
@@ -753,14 +738,9 @@ public class ModEntry : Mod
             }
         }
 
-        if (currentTime >= Config.timeOfDayToSleep && numPlayers >= 1)
-        {
-            GoToBed();
-        }
-
         //handles various events that the host normally has to click through
 
-        if (currentDate != grampasGhost && currentDate != eggFestival && currentDate != flowerDance &&
+        if (currentDate != eggFestival && currentDate != flowerDance &&
             currentDate != luau && currentDate != danceOfJellies && currentDate != stardewValleyFair &&
             currentDate != spiritsEve && currentDate != festivalOfIce && currentDate != feastOfWinterStar)
         {
@@ -803,6 +783,11 @@ public class ModEntry : Mod
             {
                 // Game1.player.increaseBackpackSize(1);
                 Game1.warpFarmer("Beach", 1, 20, 1);
+            }
+
+            if (currentTime >= Config.timeOfDayToSleep && numPlayers >= 1)
+            {
+                GoToBed();
             }
         }
     }
@@ -1114,5 +1099,10 @@ public class ModEntry : Mod
     {
         Point farmhousePos = Game1.getFarm().GetMainFarmHouseEntry();
         Game1.warpFarmer("Farm", farmhousePos.X, farmhousePos.Y, false);
+    }
+
+    private bool IsInFestival()
+    {
+        return Game1.CurrentEvent is { isFestival: true };
     }
 }
