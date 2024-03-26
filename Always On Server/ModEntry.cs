@@ -120,7 +120,11 @@ public class ModEntry : Mod
         LocalizedContentManager.LanguageCode language,
         string message)
     {
-        modInstance!.HandleCommandLater(message);
+        if (modInstance!.IsEnabled && message.StartsWith("!"))
+        {
+            modInstance.HandleCommandLater(message);
+        }
+
         return true;
     }
 
@@ -411,7 +415,7 @@ public class ModEntry : Mod
 
         //left click menu spammer and event skipper to get through random events happening
         //also moves player around, this seems to free host from random bugs sometimes
-        if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is DialogueBox)
+        if (Game1.activeClickableMenu is DialogueBox)
         {
             Game1.activeClickableMenu.receiveLeftClick(10, 10);
         }
